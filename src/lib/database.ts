@@ -104,10 +104,8 @@ export async function getTodayCallMetrics(setterEmail: string) {
       code: todayError.code
     });
 
-  // Use whichever query worked
-  let todayData = [];
-  if (todayDataDt && todayDataDt.length > 0) {
-    todayData = todayDataDt;
+  // Use the query result
+  if (todayData && todayData.length > 0) {
     console.log('Using dt field data');
   } else {
     console.log('No today data found');
