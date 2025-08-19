@@ -49,9 +49,11 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
     dialGoalProgress: 0,
     talkTimeGoalProgress: 0,
     overallGoalProgress: 0,
-    allData: []
+    allData: [],
+    userData: []
   });
   const [debugData, setDebugData] = useState<any[]>([]);
+  const [userDebugData, setUserDebugData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Fetch live metrics
@@ -62,6 +64,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
       const metrics = await getTodayCallMetrics(user.email);
       setLiveMetrics(metrics);
       setDebugData(metrics.allData || []);
+      setUserDebugData(metrics.userData || []);
     } catch (error) {
       console.error('Error fetching live metrics:', error);
     }
@@ -311,34 +314,47 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
             <div>
               <h3 className="text-lg font-semibold mb-2">User Email: {user?.email}</h3>
               <h3 className="text-lg font-semibold mb-2">Total Records Found: {debugData.length}</h3>
-              <h3 className="text-lg font-semibold mb-2">Showing: All records (no filters)</h3>
+              <h3 className="text-lg font-semibold mb-2">User Records Found: {userDebugData.length}</h3>
             </div>
             
-            {debugData.length > 0 ? (
-              <div className="bg-[#0C1018] rounded-lg p-4 max-h-96 overflow-y-auto">
-                <pre className="text-sm text-green-400 whitespace-pre-wrap">
-                  {JSON.stringify(debugData, null, 2)}
-                </pre>
-              </div>
-            ) : (
-              <div className="bg-[#0C1018] rounded-lg p-4">
-                <p className="text-yellow-400">No data found for today. Check:</p>
-                <ul className="text-sm text-gray-400 mt-2 space-y-1">
-                  <li>• Email matches setter field in database</li>
-                  <li>• Records exist for today's date</li>
-                  <li>• Database connection is working</li>
-                </ul>
-              </div>
-            )}
-            
+            <div className="mb-4">
+              <h4 className="text-lg font-semibold mb-2 text-yellow-400">All Records (First 50):</h4>
+              {debugData.length > 0 ? (
+                <div className="bg-[#0C1018] rounded-lg p-4 max-h-64 overflow-y-auto">
+                  <pre className="text-xs text-green-400 whitespace-pre-wrap">
+                    {JSON.stringify(debugData, null, 2)}
+                  </pre>
+                </div>
+              ) : (
+                <div className="bg-[#0C1018] rounded-lg p-4">
+                  <p className="text-red-400">No records found in database</p>
+                </div>
+              )}
+            </div>
+
+            <div className="mb-4">
+              <h4 className="text-lg font-semibold mb-2 text-blue-400">Records for User ({user?.email}):</h4>
+              {userDebugData.length > 0 ? (
+                <div className="bg-[#0C1018] rounded-lg p-4 max-h-64 overflow-y-auto">
+                  <pre className="text-xs text-blue-400 whitespace-pre-wrap">
+                    {JSON.stringify(userDebugData, null, 2)}
+                  </pre>
+                </div>
+              ) : (
+                <div className="bg-[#0C1018] rounded-lg p-4">
+                  <p className="text-yellow-400">No records found for this user email</p>
+                </div>
+              )}
+            </div>
+
             <div className="bg-[#0C1018] rounded-lg p-4">
               <h4 className="text-sm font-semibold mb-2 text-blue-400">Expected Data Structure:</h4>
               <pre className="text-xs text-gray-400">
 {`{
   "id": "string",
   "setter": "email@domain.com",
-  "call_duration": 120,
-  "dt": "2025-01-19T10:30:00Z",
+  "duration": 120,
+  "created_at": "2025-01-19T10:30:00Z",
   ...other fields
 }`}
               </pre>

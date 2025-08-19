@@ -29,15 +29,35 @@ export async function getTodayCallMetrics(setterEmail: string) {
     console.log('All database records (first 50):', allData);
   }
 
-  const { data, error } = await dataClient
+  // Try to get today's data for the specific user
+  const { data: todayData, error: todayError } = await dataClient
     .from('637_close_activities_calls')
     .select('*')
     .eq('setter', setterEmail)
-    .gte('dt', startOfDay.toISOString())
-    .lt('dt', endOfDay.toISOString());
+    .gte('created_at', startOfDay.toISOString())
+    .lt('created_at', endOfDay.toISOString());
 
-  if (error) {
-    console.error('Error fetching call metrics:', error);
+  if (todayError) {
+    console.error('Error fetching today call metrics:', todayError);
+  } else {
+    console.log('Today data for user:', todayData);
+  }
+
+  // Also try to get all data for this user (any date)
+  const { data: userData, error: userError } = await dataClient
+    .from('637_close_activities_calls')
+    .select('*')
+    .eq('setter', setterEmail);
+
+  if (userError) {
+    console.error('Error fetching user data:', userError);
+  } else {
+    console.log('All data for user:', userData);
+  }
+
+  const data = todayData || [];
+  
+  if (todayError && userError) {
     return {
       totalDials: 0,
       totalTalkTimeSeconds: 0,
@@ -46,7 +66,9 @@ export async function getTodayCallMetrics(setterEmail: string) {
       dialGoalProgress: 0,
       talkTimeGoalProgress: 0,
       overallGoalProgress: 0,
-      calls: allData || [] // Return all data for debugging
+      calls: data,
+      allData: allData || [], // Return all data for debugging
+      userData: userData || [] // Return user-specific data
     };
   }
 
@@ -72,6 +94,7 @@ export async function getTodayCallMetrics(setterEmail: string) {
     talkTimeGoalProgress,
     overallGoalProgress,
     calls: data || [],
-    allData: allData || [] // Include all data for debugging
+    allData: allData || [], // Include all data for debugging
+    userData: userData || [] // Include user-specific data for debugging
   };
 }
