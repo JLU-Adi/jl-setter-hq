@@ -24,38 +24,26 @@ export async function getTodayCallMetrics(setterEmail: string) {
 
   // Test basic connection first
   console.log('Testing database connection...');
-  const { data: testData, error: testError } = await supabase
+  let { data: testData, error: testError } = await supabase
     .from('637_close_activities_calls')
     .select('*')
     .limit(10);
 
   if (testError) {
     console.error('Database connection test failed:', testError);
-    return {
-      totalDials: 0,
-      totalTalkTimeSeconds: 0,
-      totalTalkTimeMinutes: 0,
-      totalTalkTimeHours: 0,
-      dialGoalProgress: 0,
-      talkTimeGoalProgress: 0,
-      overallGoalProgress: 0,
-      calls: [],
-      allData: [],
-      userData: [],
-      error: testError.message
-    };
   } else {
     console.log('Database connection successful. Sample data:', testData);
   }
 
   // Get ALL data without filters for debugging
   console.log('Fetching ALL records from 637_close_activities_calls...');
-  const { data: allData, error: allError } = await supabase
+  let { data: allData, error: allError } = await supabase
     .from('637_close_activities_calls')
     .select('*');
 
   if (allError) {
     console.error('Error fetching all data:', allError);
+    allData = [];
   } else {
     console.log('ALL database records:', allData);
     console.log('Total records in table:', allData?.length || 0);
@@ -63,13 +51,14 @@ export async function getTodayCallMetrics(setterEmail: string) {
 
   // Get all data for this user (any date) - for debugging
   console.log('Fetching user-specific records...');
-  const { data: allUserData, error: allUserError } = await supabase
+  let { data: userData, error: userError } = await supabase
     .from('637_close_activities_calls')
     .select('*')
     .eq('setter', setterEmail);
 
   if (allUserError) {
     console.error('Error fetching user data:', allUserError);
+    userData = [];
   } else {
     console.log('All data for user:', allUserData);
     console.log('Number of records for user:', allUserData?.length || 0);
@@ -77,7 +66,7 @@ export async function getTodayCallMetrics(setterEmail: string) {
 
   // Get today's data using the correct dt field and format
   console.log('Fetching today data for user with dt field and Eastern timezone...');
-  const { data: todayDataCast, error: todayErrorCast } = await supabase
+  let { data: todayDataDt, error: todayErrorDt } = await supabase
     .from('637_close_activities_calls')
     .select('*')
     .eq('setter', setterEmail)
@@ -89,28 +78,12 @@ export async function getTodayCallMetrics(setterEmail: string) {
 
   // Use whichever query worked
   let todayData = [];
-
+  let { data: todayDataCast, error: todayErrorCast } = await supabase
   if (todayDataCast && todayDataCast.length > 0) {
     todayData = todayDataCast;
     console.log('Using dt field data');
   } else {
     console.log('No today data found');
-  }
-
-  if (allUserError || allError) {
-    return {
-      totalDials: 0,
-      totalTalkTimeSeconds: 0,
-      totalTalkTimeMinutes: 0,
-      totalTalkTimeHours: 0,
-      dialGoalProgress: 0,
-      talkTimeGoalProgress: 0,
-      overallGoalProgress: 0,
-      calls: todayData || [],
-      allData: allData || [], // Return all data for debugging
-      userData: allUserData || [], // Return user-specific data
-      error: allUserError?.message || allError?.message || 'Query error'
-    };
   }
 
   const data = todayData || [];
