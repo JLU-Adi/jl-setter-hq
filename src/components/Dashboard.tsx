@@ -50,6 +50,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
     talkTimeGoalProgress: 0,
     overallGoalProgress: 0
   });
+  const [debugData, setDebugData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Fetch live metrics
@@ -59,6 +60,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
     try {
       const metrics = await getTodayCallMetrics(user.email);
       setLiveMetrics(metrics);
+      setDebugData(metrics.calls || []);
     } catch (error) {
       console.error('Error fetching live metrics:', error);
     }
@@ -294,6 +296,50 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
                   style={{ width: `${Math.min(liveMetrics.talkTimeGoalProgress, 100)}%` }}
                 ></div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Debug Data Display */}
+        <div className="bg-[#1A1F2E] rounded-xl p-6 border border-gray-700">
+          <h2 className="text-xl font-bold mb-4 flex items-center">
+            <Activity className="w-5 h-5 mr-2" />
+            Debug: Raw Database Data
+          </h2>
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">User Email: {user?.email}</h3>
+              <h3 className="text-lg font-semibold mb-2">Total Records Found: {debugData.length}</h3>
+            </div>
+            
+            {debugData.length > 0 ? (
+              <div className="bg-[#0C1018] rounded-lg p-4 max-h-96 overflow-y-auto">
+                <pre className="text-sm text-green-400 whitespace-pre-wrap">
+                  {JSON.stringify(debugData, null, 2)}
+                </pre>
+              </div>
+            ) : (
+              <div className="bg-[#0C1018] rounded-lg p-4">
+                <p className="text-yellow-400">No data found for today. Check:</p>
+                <ul className="text-sm text-gray-400 mt-2 space-y-1">
+                  <li>• Email matches setter field in database</li>
+                  <li>• Records exist for today's date</li>
+                  <li>• Database connection is working</li>
+                </ul>
+              </div>
+            )}
+            
+            <div className="bg-[#0C1018] rounded-lg p-4">
+              <h4 className="text-sm font-semibold mb-2 text-blue-400">Expected Data Structure:</h4>
+              <pre className="text-xs text-gray-400">
+{`{
+  "id": "string",
+  "setter": "email@domain.com",
+  "call_duration": 120,
+  "dt": "2025-01-19T10:30:00Z",
+  ...other fields
+}`}
+              </pre>
             </div>
           </div>
         </div>
