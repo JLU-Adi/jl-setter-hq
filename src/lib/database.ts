@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 const databaseUrl = import.meta.env.VITE_DATA_URL || '';
-const databaseKey = import.meta.env.VITE_DATA_ANON || '';
+const databaseKey = import.meta.env.VITE_DATA_ANON || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bmd5c25zeWxwb3Z6a25hb2xvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4MzY1NDgsImV4cCI6MjA2NzQxMjU0OH0.PSbc4pqm81K6mbjOjH2nKjRE_Qr1OW9o0_EHfgfG9Dg';
 
 export const dataClient = createClient(databaseUrl, databaseKey);
 
