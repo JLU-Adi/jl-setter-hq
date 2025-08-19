@@ -318,11 +318,11 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
   };
 
   const selectedCloserData = closers.find(c => c.id === selectedCloser);
+  const weekDates = getWeekDates();
   const selectedCloserBookings = bookings.filter(b => 
     b.closerId === selectedCloser && 
     weekDates.some(date => date.toISOString().split('T')[0] === b.date)
   );
-  const weekDates = getWeekDates();
 
   return (
     <div className="min-h-screen bg-[#0C1018] text-white">
