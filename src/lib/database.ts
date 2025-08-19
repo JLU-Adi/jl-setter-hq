@@ -28,25 +28,39 @@ export async function getTodayCallMetrics(setterEmail: string) {
 
   // Test basic connection first
   console.log('Testing database connection...');
-  let { data: testData, error: testError } = await supabase
+  
+  // Try with service role key if available, otherwise use anon key
+  const client = supabase;
+  
+  let { data: testData, error: testError } = await client
     .from('637_close_activities_calls')
     .select('*')
     .limit(10);
 
   if (testError) {
-    console.error('Database connection test failed:', testError);
+    console.error('Database connection test failed:', {
+      message: testError.message,
+      details: testError.details,
+      hint: testError.hint,
+      code: testError.code
+    });
   } else {
     console.log('Database connection successful. Sample data:', testData);
   }
 
   // Get ALL data without filters for debugging
   console.log('Fetching ALL records from 637_close_activities_calls...');
-  let { data: allData, error: allError } = await supabase
+  let { data: allData, error: allError } = await client
     .from('637_close_activities_calls')
     .select('*');
 
   if (allError) {
-    console.error('Error fetching all data:', allError);
+    console.error('Error fetching all data:', {
+      message: allError.message,
+      details: allError.details,
+      hint: allError.hint,
+      code: allError.code
+    });
     allData = [];
   } else {
     console.log('ALL database records:', allData);
@@ -55,13 +69,18 @@ export async function getTodayCallMetrics(setterEmail: string) {
 
   // Get all data for this user (any date) - for debugging
   console.log('Fetching user-specific records...');
-  let { data: userData, error: userError } = await supabase
+  let { data: userData, error: userError } = await client
     .from('637_close_activities_calls')
     .select('*')
     .eq('setter', setterEmail);
 
   if (userError) {
-    console.error('Error fetching user data:', userError);
+    console.error('Error fetching user data:', {
+      message: userError.message,
+      details: userError.details,
+      hint: userError.hint,
+      code: userError.code
+    });
     userData = [];
   } else {
     console.log('All data for user:', userData);
@@ -70,7 +89,7 @@ export async function getTodayCallMetrics(setterEmail: string) {
 
   // Get today's data using the correct dt field and format
   console.log('Fetching today data for user with dt field and Eastern timezone...');
-  let { data: todayDataDt, error: todayErrorDt } = await supabase
+  let { data: todayData, error: todayError } = await client
     .from('637_close_activities_calls')
     .select('*')
     .eq('setter', setterEmail)
@@ -78,7 +97,12 @@ export async function getTodayCallMetrics(setterEmail: string) {
     .lte('dt', endOfDay);
 
   console.log('Today data with dt field:', todayDataDt);
-  console.log('Today data dt error:', todayErrorDt);
+    console.error('Error fetching today data:', {
+      message: todayError.message,
+      details: todayError.details,
+      hint: todayError.hint,
+      code: todayError.code
+    });
 
   // Use whichever query worked
   let todayData = [];
