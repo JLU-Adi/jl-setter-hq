@@ -67,6 +67,19 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
       setUserDebugData(metrics.userData || []);
     } catch (error) {
       console.error('Error fetching live metrics:', error);
+      // Set empty data on error to prevent UI issues
+      setLiveMetrics({
+        totalDials: 0,
+        totalTalkTimeMinutes: 0,
+        totalTalkTimeHours: 0,
+        dialGoalProgress: 0,
+        talkTimeGoalProgress: 0,
+        overallGoalProgress: 0,
+        allData: [],
+        userData: []
+      });
+      setDebugData([]);
+      setUserDebugData([]);
     }
   };
 

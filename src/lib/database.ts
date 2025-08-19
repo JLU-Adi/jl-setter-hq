@@ -96,13 +96,16 @@ export async function getTodayCallMetrics(setterEmail: string) {
     .gte('dt', startOfDay)
     .lte('dt', endOfDay);
 
-  console.log('Today data with dt field:', todayDataDt);
+  console.log('Today data with dt field:', todayData);
+  
+  if (todayError) {
     console.error('Error fetching today data:', {
       message: todayError.message,
       details: todayError.details,
       hint: todayError.hint,
       code: todayError.code
     });
+  }
 
   // Use the query result
   if (todayData && todayData.length > 0) {
