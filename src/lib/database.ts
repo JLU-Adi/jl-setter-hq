@@ -17,11 +17,41 @@ export async function getTodayCallMetrics(setterEmail: string) {
   const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
 
-  // Debug: Get all data without filters
+  console.log('Fetching data for setter:', setterEmail);
+  console.log('Date range:', startOfDay.toISOString(), 'to', endOfDay.toISOString());
+
+  // Test basic connection first
+  console.log('Testing database connection...');
+  const { data: testData, error: testError } = await dataClient
+    .from('637_close_activities_calls')
+    .select('*', { count: 'exact' })
+    .limit(5);
+
+  if (testError) {
+    console.error('Database connection test failed:', testError);
+    return {
+      totalDials: 0,
+      totalTalkTimeSeconds: 0,
+      totalTalkTimeMinutes: 0,
+      totalTalkTimeHours: 0,
+      dialGoalProgress: 0,
+      talkTimeGoalProgress: 0,
+      overallGoalProgress: 0,
+      calls: [],
+      allData: [],
+      userData: [],
+      error: testError.message
+    };
+  } else {
+    console.log('Database connection successful. Sample data:', testData);
+  }
+
+  // Get all data without filters (first 50)
+  console.log('Fetching all records...');
   const { data: allData, error: allError } = await dataClient
     .from('637_close_activities_calls')
     .select('*')
-    .limit(50); // Limit to first 50 records
+    .limit(50);
 
   if (allError) {
     console.error('Error fetching all data:', allError);
@@ -29,21 +59,8 @@ export async function getTodayCallMetrics(setterEmail: string) {
     console.log('All database records (first 50):', allData);
   }
 
-  // Try to get today's data for the specific user
-  const { data: todayData, error: todayError } = await dataClient
-    .from('637_close_activities_calls')
-    .select('*')
-    .eq('setter', setterEmail)
-    .gte('created_at', startOfDay.toISOString())
-    .lt('created_at', endOfDay.toISOString());
-
-  if (todayError) {
-    console.error('Error fetching today call metrics:', todayError);
-  } else {
-    console.log('Today data for user:', todayData);
-  }
-
-  // Also try to get all data for this user (any date)
+  // Get all data for this user (any date)
+  console.log('Fetching user-specific records...');
   const { data: userData, error: userError } = await dataClient
     .from('637_close_activities_calls')
     .select('*')
@@ -55,9 +72,24 @@ export async function getTodayCallMetrics(setterEmail: string) {
     console.log('All data for user:', userData);
   }
 
+  // Get today's data for the specific user
+  console.log('Fetching today data for user...');
+  const { data: todayData, error: todayError } = await dataClient
+    .from('637_close_activities_calls')
+    .select('*')
+    .eq('setter', setterEmail)
+    .gte('dt', startOfDay.toISOString())
+    .lt('dt', endOfDay.toISOString());
+
+  if (todayError) {
+    console.error('Error fetching today call metrics:', todayError);
+  } else {
+    console.log('Today data for user:', todayData);
+  }
+
   const data = todayData || [];
   
-  if (todayError && userError) {
+  if (todayError && userError && allError) {
     return {
       totalDials: 0,
       totalTalkTimeSeconds: 0,
@@ -68,7 +100,8 @@ export async function getTodayCallMetrics(setterEmail: string) {
       overallGoalProgress: 0,
       calls: data,
       allData: allData || [], // Return all data for debugging
-      userData: userData || [] // Return user-specific data
+      userData: userData || [], // Return user-specific data
+      error: 'Multiple query errors occurred'
     };
   }
 
