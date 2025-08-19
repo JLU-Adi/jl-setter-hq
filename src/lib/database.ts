@@ -57,7 +57,7 @@ export async function getTodayCallMetrics(setterEmail: string) {
     .eq('setter', setterEmail);
 
   if (allUserError) {
-    console.error('Error fetching user data:', allUserError);
+    console.error('Error fetching user data:', userError);
     userData = [];
   } else {
     console.log('All data for user:', userData);
