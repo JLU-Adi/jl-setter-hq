@@ -29,7 +29,7 @@ export async function getTodayCallMetrics(setterEmail: string) {
   // Test basic connection first
   console.log('Testing database connection...');
   
-  // Try with service role key if available, otherwise use anon key
+  let { data: testData, error: testError } = await supabase
   const client = supabase;
   
   let { data: testData, error: testError } = await client
