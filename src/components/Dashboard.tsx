@@ -276,26 +276,17 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
                 <p className="text-sm text-gray-400">Click the button below to view availability in Google Calendar</p>
               </div>
               
-              {/* Google Calendar Link */}
-              <div className="text-center py-8">
-                <div className="mb-4">
-                  <Calendar className="w-16 h-16 text-blue-400 mx-auto mb-4" />
-                  <p className="text-gray-400 mb-6">
-                    Google Calendar cannot be embedded directly due to security restrictions.
-                  </p>
-                </div>
-                <a
-                  href={`https://calendar.google.com/calendar/u/0?cid=${encodeURIComponent('adi@jacoblevinrad.com')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                >
-                  <Calendar className="w-5 h-5" />
-                  <span>Open {selectedCloserData.name}'s Calendar</span>
-                </a>
-                <p className="text-xs text-gray-500 mt-3">
-                  Opens in a new tab
-                </p>
+              {/* Google Calendar Embed */}
+              <div className="w-full overflow-hidden rounded-lg">
+                <iframe 
+                  src="https://calendar.google.com/calendar/embed?src=adi%40jacoblevinrad.com&ctz=America%2FToronto" 
+                  style={{ border: 0 }} 
+                  width="800" 
+                  height="600" 
+                  frameBorder="0" 
+                  scrolling="no"
+                  className="w-full"
+                />
               </div>
             </div>
           )}
