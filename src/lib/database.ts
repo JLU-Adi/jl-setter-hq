@@ -26,8 +26,8 @@ export async function getTodayCallMetrics(setterEmail: string) {
   console.log('Testing database connection...');
   const { data: testData, error: testError } = await supabase
     .from('637_close_activities_calls')
-    .select('*', { count: 'exact' })
-    .limit(5);
+    .select('*')
+    .limit(10);
 
   if (testError) {
     console.error('Database connection test failed:', testError);
@@ -48,17 +48,17 @@ export async function getTodayCallMetrics(setterEmail: string) {
     console.log('Database connection successful. Sample data:', testData);
   }
 
-  // Get all data without filters (first 50)
-  console.log('Fetching all records...');
+  // Get ALL data without filters for debugging
+  console.log('Fetching ALL records from 637_close_activities_calls...');
   const { data: allData, error: allError } = await supabase
     .from('637_close_activities_calls')
-    .select('*')
-    .limit(50);
+    .select('*');
 
   if (allError) {
     console.error('Error fetching all data:', allError);
   } else {
-    console.log('All database records (first 50):', allData);
+    console.log('ALL database records:', allData);
+    console.log('Total records in table:', allData?.length || 0);
   }
 
   // Get all data for this user (any date) - for debugging

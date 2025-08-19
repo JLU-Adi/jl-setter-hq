@@ -308,7 +308,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
         <div className="bg-[#1A1F2E] rounded-xl p-6 border border-gray-700">
           <h2 className="text-xl font-bold mb-4 flex items-center">
             <Activity className="w-5 h-5 mr-2" />
-            Debug: Raw Database Data
+            Debug: All 637_close_activities_calls Entries
           </h2>
           <div className="space-y-4">
             <div>
@@ -318,9 +318,9 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
             </div>
             
             <div className="mb-4">
-              <h4 className="text-lg font-semibold mb-2 text-yellow-400">All Records (First 50):</h4>
+              <h4 className="text-lg font-semibold mb-2 text-yellow-400">All Records from 637_close_activities_calls:</h4>
               {debugData.length > 0 ? (
-                <div className="bg-[#0C1018] rounded-lg p-4 max-h-64 overflow-y-auto">
+                <div className="bg-[#0C1018] rounded-lg p-4 max-h-96 overflow-y-auto">
                   <pre className="text-xs text-green-400 whitespace-pre-wrap">
                     {JSON.stringify(debugData, null, 2)}
                   </pre>
@@ -335,7 +335,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
             <div className="mb-4">
               <h4 className="text-lg font-semibold mb-2 text-blue-400">Records for User ({user?.email}):</h4>
               {userDebugData.length > 0 ? (
-                <div className="bg-[#0C1018] rounded-lg p-4 max-h-64 overflow-y-auto">
+                <div className="bg-[#0C1018] rounded-lg p-4 max-h-96 overflow-y-auto">
                   <pre className="text-xs text-blue-400 whitespace-pre-wrap">
                     {JSON.stringify(userDebugData, null, 2)}
                   </pre>
@@ -348,14 +348,15 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
             </div>
 
             <div className="bg-[#0C1018] rounded-lg p-4">
-              <h4 className="text-sm font-semibold mb-2 text-blue-400">Expected Data Structure:</h4>
+              <h4 className="text-sm font-semibold mb-2 text-blue-400">Table: 637_close_activities_calls Structure:</h4>
               <pre className="text-xs text-gray-400">
 {`{
   "id": "string",
-  "setter": "email@domain.com",
+  "dt": "2025-08-19 18:04:43",
+  "lead": "string",
+  "setter": "email@domain.com", 
   "duration": 120,
-  "created_at": "2025-01-19T10:30:00Z",
-  ...other fields
+  "direction": "string"
 }`}
               </pre>
             </div>
