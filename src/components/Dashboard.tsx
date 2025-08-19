@@ -279,14 +279,16 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
               {/* Google Calendar Iframe */}
               <div className="w-full h-96 bg-white rounded-lg overflow-hidden">
                 <iframe
-                  src={`https://calendar.google.com/calendar/embed?src=${encodeURIComponent(selectedCloserData.email)}&ctz=America%2FNew_York&mode=WEEK&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23ffffff`}
-                  style={{ border: 0 }}
+                  src="https://calendar.google.com/calendar/embed?src=adi%40jacoblevinrad.com&ctz=America%2FNew_York&mode=WEEK&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23ffffff"
                   width="100%"
                   height="100%"
-                  frameBorder="0"
+                  style={{ border: 0 }}
+                  frameBorder={0}
                   scrolling="no"
+                  sandbox="allow-scripts allow-same-origin"
+                  referrerPolicy="no-referrer-when-downgrade"
                   title={`${selectedCloserData.name}'s Calendar`}
-                />
+                ></iframe>
               </div>
             </div>
           )}
