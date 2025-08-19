@@ -48,7 +48,8 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
     totalTalkTimeHours: 0,
     dialGoalProgress: 0,
     talkTimeGoalProgress: 0,
-    overallGoalProgress: 0
+    overallGoalProgress: 0,
+    allData: []
   });
   const [debugData, setDebugData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,7 +61,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
     try {
       const metrics = await getTodayCallMetrics(user.email);
       setLiveMetrics(metrics);
-      setDebugData(metrics.calls || []);
+      setDebugData(metrics.allData || []);
     } catch (error) {
       console.error('Error fetching live metrics:', error);
     }
@@ -310,6 +311,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
             <div>
               <h3 className="text-lg font-semibold mb-2">User Email: {user?.email}</h3>
               <h3 className="text-lg font-semibold mb-2">Total Records Found: {debugData.length}</h3>
+              <h3 className="text-lg font-semibold mb-2">Showing: All records (no filters)</h3>
             </div>
             
             {debugData.length > 0 ? (

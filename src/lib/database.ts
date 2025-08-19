@@ -17,6 +17,18 @@ export async function getTodayCallMetrics(setterEmail: string) {
   const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
 
+  // Debug: Get all data without filters
+  const { data: allData, error: allError } = await dataClient
+    .from('637_close_activities_calls')
+    .select('*')
+    .limit(50); // Limit to first 50 records
+
+  if (allError) {
+    console.error('Error fetching all data:', allError);
+  } else {
+    console.log('All database records (first 50):', allData);
+  }
+
   const { data, error } = await dataClient
     .from('637_close_activities_calls')
     .select('*')
@@ -33,7 +45,8 @@ export async function getTodayCallMetrics(setterEmail: string) {
       totalTalkTimeHours: 0,
       dialGoalProgress: 0,
       talkTimeGoalProgress: 0,
-      overallGoalProgress: 0
+      overallGoalProgress: 0,
+      calls: allData || [] // Return all data for debugging
     };
   }
 
@@ -58,6 +71,7 @@ export async function getTodayCallMetrics(setterEmail: string) {
     dialGoalProgress,
     talkTimeGoalProgress,
     overallGoalProgress,
-    calls: data || []
+    calls: data || [],
+    allData: allData || [] // Include all data for debugging
   };
 }
