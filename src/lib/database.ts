@@ -60,8 +60,8 @@ export async function getTodayCallMetrics(setterEmail: string) {
     console.error('Error fetching user data:', allUserError);
     userData = [];
   } else {
-    console.log('All data for user:', allUserData);
-    console.log('Number of records for user:', allUserData?.length || 0);
+    console.log('All data for user:', userData);
+    console.log('Number of records for user:', userData?.length || 0);
   }
 
   // Get today's data using the correct dt field and format
@@ -110,6 +110,6 @@ export async function getTodayCallMetrics(setterEmail: string) {
     overallGoalProgress,
     calls: data || [],
     allData: allData || [], // Include all data for debugging
-    userData: allUserData || [] // Include user-specific data for debugging
+    userData: userData || [] // Include user-specific data for debugging
   };
 }
