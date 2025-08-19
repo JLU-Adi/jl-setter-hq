@@ -56,7 +56,7 @@ export async function getTodayCallMetrics(setterEmail: string) {
     .select('*')
     .eq('setter', setterEmail);
 
-  if (allUserError) {
+  if (userError) {
     console.error('Error fetching user data:', userError);
     userData = [];
   } else {
@@ -73,14 +73,13 @@ export async function getTodayCallMetrics(setterEmail: string) {
     .gte('dt', startOfDay)
     .lte('dt', endOfDay);
 
-  console.log('Today data with dt field:', todayDataCast);
-  console.log('Today data dt error:', todayErrorCast);
+  console.log('Today data with dt field:', todayDataDt);
+  console.log('Today data dt error:', todayErrorDt);
 
   // Use whichever query worked
   let todayData = [];
-  let { data: todayDataCast, error: todayErrorCast } = await supabase
-  if (todayDataCast && todayDataCast.length > 0) {
-    todayData = todayDataCast;
+  if (todayDataDt && todayDataDt.length > 0) {
+    todayData = todayDataDt;
     console.log('Using dt field data');
   } else {
     console.log('No today data found');
