@@ -21,8 +21,8 @@ export async function getTodayCallMetrics(setterEmail: string) {
     .from('637_close_activities_calls')
     .select('*')
     .eq('setter', setterEmail)
-    .gte('created_at', startOfDay.toISOString())
-    .lt('created_at', endOfDay.toISOString());
+    .gte('createdAt', startOfDay.toISOString())
+    .lt('createdAt', endOfDay.toISOString());
 
   if (error) {
     console.error('Error fetching call metrics:', error);
@@ -30,6 +30,7 @@ export async function getTodayCallMetrics(setterEmail: string) {
       totalDials: 0,
       totalTalkTimeSeconds: 0,
       totalTalkTimeMinutes: 0,
+      totalTalkTimeHours: 0,
       dialGoalProgress: 0,
       talkTimeGoalProgress: 0,
       overallGoalProgress: 0
