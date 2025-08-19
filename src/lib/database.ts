@@ -38,7 +38,7 @@ export async function getTodayCallMetrics(setterEmail: string) {
   }
 
   const totalDials = data?.length || 0;
-  const totalTalkTimeSeconds = data?.reduce((sum, call) => sum + (call.call_duration || 0), 0) || 0;
+  const totalTalkTimeSeconds = data?.reduce((sum, call) => sum + (call.duration || 0), 0) || 0;
   const totalTalkTimeMinutes = totalTalkTimeSeconds / 60;
   const totalTalkTimeHours = totalTalkTimeMinutes / 60;
 
