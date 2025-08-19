@@ -22,6 +22,10 @@ export async function getTodayCallMetrics(setterEmail: string) {
   console.log('Date range (Eastern):', startOfDay, 'to', endOfDay);
   console.log('Today date string:', todayDateString);
 
+  // Log the Supabase client configuration
+  console.log('Supabase client URL:', supabase.supabaseUrl);
+  console.log('Supabase client key (first 20 chars):', supabase.supabaseKey?.substring(0, 20) + '...');
+
   // Test basic connection first
   console.log('Testing database connection...');
   let { data: testData, error: testError } = await supabase
