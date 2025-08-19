@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
-const databaseUrl = import.meta.env.VITE_DATA_URL || '';
-const databaseKey = import.meta.env.VITE_DATA_KEY || '';
+const databaseUrl = import.meta.env.DATA_URL || '';
+const databaseKey = import.meta.env.DATA_ANON || '';
 
 export const dataClient = createClient(databaseUrl, databaseKey);
 
