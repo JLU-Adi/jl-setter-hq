@@ -439,7 +439,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
 
         {/* Quick Actions */}
         <div className="bg-[#1A1F2E] rounded-xl p-6 border border-gray-700">
-          </h2>
+          <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <button className="flex items-center justify-center space-x-2 p-4 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">
               <Phone className="w-5 h-5" />
