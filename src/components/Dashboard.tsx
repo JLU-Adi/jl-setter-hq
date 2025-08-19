@@ -273,22 +273,29 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
             <div className="bg-[#0C1018] rounded-lg p-4">
               <div className="mb-4">
                 <h4 className="font-medium text-lg">{selectedCloserData.name}'s Schedule</h4>
-                <p className="text-sm text-gray-400">View availability and schedule appointments</p>
+                <p className="text-sm text-gray-400">Click the button below to view availability in Google Calendar</p>
               </div>
               
-              {/* Google Calendar Iframe */}
-              <div className="w-full h-96 bg-white rounded-lg overflow-hidden">
-                <iframe
-                  src="https://calendar.google.com/calendar/embed?src=adi%40jacoblevinrad.com&ctz=America%2FNew_York&mode=WEEK&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23ffffff"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  frameBorder={0}
-                  scrolling="no"
-                  sandbox="allow-scripts allow-same-origin"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title={`${selectedCloserData.name}'s Calendar`}
-                ></iframe>
+              {/* Google Calendar Link */}
+              <div className="text-center py-8">
+                <div className="mb-4">
+                  <Calendar className="w-16 h-16 text-blue-400 mx-auto mb-4" />
+                  <p className="text-gray-400 mb-6">
+                    Google Calendar cannot be embedded directly due to security restrictions.
+                  </p>
+                </div>
+                <a
+                  href={`https://calendar.google.com/calendar/u/0?cid=${encodeURIComponent('adi@jacoblevinrad.com')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                >
+                  <Calendar className="w-5 h-5" />
+                  <span>Open {selectedCloserData.name}'s Calendar</span>
+                </a>
+                <p className="text-xs text-gray-500 mt-3">
+                  Opens in a new tab
+                </p>
               </div>
             </div>
           )}
