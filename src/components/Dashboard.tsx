@@ -58,10 +58,11 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
 
   // Fetch live metrics
   const fetchLiveMetrics = async () => {
-    if (!user?.email) return;
+    const testEmail = 'yasir@637group.com';
+    console.log('Using test email:', testEmail);
     
     try {
-      const metrics = await getTodayCallMetrics(user.email);
+      const metrics = await getTodayCallMetrics(testEmail);
       setLiveMetrics(metrics);
       setDebugData(metrics.allData || []);
       setUserDebugData(metrics.userData || []);
@@ -90,7 +91,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
     // Set up real-time updates every 30 seconds
     const interval = setInterval(fetchLiveMetrics, 30000);
     return () => clearInterval(interval);
-  }, [user?.email]);
+  }, []);
 
   // Update KPIs when live metrics change
   useEffect(() => {
@@ -325,7 +326,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
           </h2>
           <div className="space-y-4">
             <div>
-              <h3 className="text-lg font-semibold mb-2">User Email: {user?.email}</h3>
+              <h3 className="text-lg font-semibold mb-2">User Email: yasir@637group.com (test email)</h3>
               <h3 className="text-lg font-semibold mb-2">Total Records Found: {debugData.length}</h3>
               <h3 className="text-lg font-semibold mb-2">User Records Found: {userDebugData.length}</h3>
             </div>
@@ -346,7 +347,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
             </div>
 
             <div className="mb-4">
-              <h4 className="text-lg font-semibold mb-2 text-blue-400">Records for User ({user?.email}):</h4>
+              <h4 className="text-lg font-semibold mb-2 text-blue-400">Records for User (yasir@637group.com):</h4>
               {userDebugData.length > 0 ? (
                 <div className="bg-[#0C1018] rounded-lg p-4 max-h-96 overflow-y-auto">
                   <pre className="text-xs text-blue-400 whitespace-pre-wrap">
@@ -367,7 +368,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
   "id": "string",
   "dt": "2025-08-19 18:04:43",
   "lead": "string",
-  "setter": "email@domain.com", 
+  "setter": "yasir@637group.com", 
   "duration": 120,
   "direction": "string"
 }`}
