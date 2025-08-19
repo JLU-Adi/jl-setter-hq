@@ -10,11 +10,11 @@ export interface CallActivity {
 export async function getTodayCallMetrics(setterEmail: string) {
   // Get today's date in Eastern timezone
   const today = new Date();
-  const easternOffset = -5; // EST is UTC-5 (adjust to -4 for EDT if needed)
-  const easternToday = new Date(today.getTime() + (easternOffset * 60 * 60 * 1000));
+  // Use UTC for consistency with database
+  const todayUTC = new Date(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
   
   // Format as YYYY-MM-DD for the database query
-  const todayDateString = easternToday.toISOString().split('T')[0]; // e.g., "2025-01-19"
+  const todayDateString = todayUTC.toISOString().split('T')[0]; // e.g., "2025-01-19"
   const startOfDay = `${todayDateString} 00:00:00`;
   const endOfDay = `${todayDateString} 23:59:59`;
 
@@ -29,9 +29,8 @@ export async function getTodayCallMetrics(setterEmail: string) {
   // Test basic connection first
   console.log('Testing database connection...');
   
-  const client = supabase;
-  
-  let { data: testData, error: testError } = await client
+  // Test with a simple query first
+  let { data: testData, error: testError } = await supabase
     .from('close_activities_calls')
     .select('*')
     .limit(10);
@@ -49,7 +48,7 @@ export async function getTodayCallMetrics(setterEmail: string) {
 
   // Get ALL data without filters for debugging
   console.log('Fetching ALL records from close_activities_calls...');
-  let { data: allData, error: allError } = await client
+  let { data: allData, error: allError } = await supabase
     .from('close_activities_calls')
     .select('*');
 
@@ -68,7 +67,7 @@ export async function getTodayCallMetrics(setterEmail: string) {
 
   // Get all data for this user (any date) - for debugging
   console.log('Fetching user-specific records...');
-  let { data: userData, error: userError } = await client
+  let { data: userData, error: userError } = await supabase
     .from('close_activities_calls')
     .select('*')
     .eq('setter', setterEmail);
@@ -88,12 +87,25 @@ export async function getTodayCallMetrics(setterEmail: string) {
 
   // Get today's data using the correct dt field and format
   console.log('Fetching today data for user with dt field and Eastern timezone...');
-  let { data: todayData, error: todayError } = await client
+  let { data: todayData, error: todayError } = await supabase
     .from('close_activities_calls')
     .select('*')
     .eq('setter', setterEmail)
     .gte('dt', startOfDay)
     .lte('dt', endOfDay);
+
+  // Also try without date filter to see if there's any data for this user
+  console.log('Fetching all data for user without date filter...');
+  let { data: allUserData, error: allUserError } = await supabase
+    .from('close_activities_calls')
+    .select('*')
+    .eq('setter', setterEmail);
+
+  if (allUserError) {
+    console.error('Error fetching all user data:', allUserError);
+  } else {
+    console.log('All user data (no date filter):', allUserData);
+  }
 
   console.log('Today data with dt field:', todayData);
   
