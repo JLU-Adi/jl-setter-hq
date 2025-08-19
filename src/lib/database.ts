@@ -68,11 +68,11 @@ export async function getTodayCallMetrics(setterEmail: string) {
     .select('*')
     .eq('setter', setterEmail);
 
-  if (userError) {
-    console.error('Error fetching user data:', userError);
+  if (allUserError) {
+    console.error('Error fetching user data:', allUserError);
   } else {
-    console.log('All data for user:', userData);
-    console.log('Number of records for user:', userData?.length || 0);
+    console.log('All data for user:', allUserData);
+    console.log('Number of records for user:', allUserData?.length || 0);
   }
 
   // Get today's data using the correct dt field and format
@@ -84,20 +84,20 @@ export async function getTodayCallMetrics(setterEmail: string) {
     .gte('dt', startOfDay)
     .lte('dt', endOfDay);
 
-  console.log('Today data with dt field:', todayDataDt);
-  console.log('Today data dt error:', todayErrorDt);
+  console.log('Today data with dt field:', todayDataCast);
+  console.log('Today data dt error:', todayErrorCast);
 
   // Use whichever query worked
   let todayData = [];
 
-  if (todayDataDt && todayDataDt.length > 0) {
-    todayData = todayDataDt;
+  if (todayDataCast && todayDataCast.length > 0) {
+    todayData = todayDataCast;
     console.log('Using dt field data');
   } else {
     console.log('No today data found');
   }
 
-  if (userError || allError) {
+  if (allUserError || allError) {
     return {
       totalDials: 0,
       totalTalkTimeSeconds: 0,
@@ -108,8 +108,8 @@ export async function getTodayCallMetrics(setterEmail: string) {
       overallGoalProgress: 0,
       calls: todayData || [],
       allData: allData || [], // Return all data for debugging
-      userData: userData || [], // Return user-specific data
-      error: userError?.message || allError?.message || 'Query error'
+      userData: allUserData || [], // Return user-specific data
+      error: allUserError?.message || allError?.message || 'Query error'
     };
   }
 
@@ -137,6 +137,6 @@ export async function getTodayCallMetrics(setterEmail: string) {
     overallGoalProgress,
     calls: data || [],
     allData: allData || [], // Include all data for debugging
-    userData: userData || [] // Include user-specific data for debugging
+    userData: allUserData || [] // Include user-specific data for debugging
   };
 }
