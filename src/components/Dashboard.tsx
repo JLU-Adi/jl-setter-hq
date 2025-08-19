@@ -321,7 +321,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
         <div className="bg-[#1A1F2E] rounded-xl p-6 border border-gray-700">
           <h2 className="text-xl font-bold mb-4 flex items-center">
             <Activity className="w-5 h-5 mr-2" />
-            Debug: All 637_close_activities_calls Entries
+            Debug: All close_activities_calls Entries
           </h2>
           <div className="space-y-4">
             <div>
@@ -361,7 +361,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
             </div>
 
             <div className="bg-[#0C1018] rounded-lg p-4">
-              <h4 className="text-sm font-semibold mb-2 text-blue-400">Table: 637_close_activities_calls Structure:</h4>
+              <h4 className="text-sm font-semibold mb-2 text-blue-400">Table: close_activities_calls Structure:</h4>
               <pre className="text-xs text-gray-400">
 {`{
   "id": "string",
