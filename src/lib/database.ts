@@ -13,12 +13,19 @@ export interface CallActivity {
 }
 
 export async function getTodayCallMetrics(setterEmail: string) {
+  // Get today's date in Eastern timezone
   const today = new Date();
-  const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
+  const easternOffset = -5; // EST is UTC-5 (adjust to -4 for EDT if needed)
+  const easternToday = new Date(today.getTime() + (easternOffset * 60 * 60 * 1000));
+  
+  // Format as YYYY-MM-DD for the database query
+  const todayDateString = easternToday.toISOString().split('T')[0]; // e.g., "2025-01-19"
+  const startOfDay = `${todayDateString} 00:00:00`;
+  const endOfDay = `${todayDateString} 23:59:59`;
 
   console.log('Fetching data for setter:', setterEmail);
-  console.log('Date range:', startOfDay.toISOString(), 'to', endOfDay.toISOString());
+  console.log('Date range (Eastern):', startOfDay, 'to', endOfDay);
+  console.log('Today date string:', todayDateString);
 
   // Test basic connection first
   console.log('Testing database connection...');
@@ -59,7 +66,7 @@ export async function getTodayCallMetrics(setterEmail: string) {
     console.log('All database records (first 50):', allData);
   }
 
-  // Get all data for this user (any date)
+  // Get all data for this user (any date) - for debugging
   console.log('Fetching user-specific records...');
   const { data: userData, error: userError } = await dataClient
     .from('637_close_activities_calls')
@@ -73,63 +80,44 @@ export async function getTodayCallMetrics(setterEmail: string) {
     console.log('Number of records for user:', userData?.length || 0);
   }
 
-  // Try different date field names and formats
-  console.log('Fetching today data for user with dt field...');
+  // Get today's data using the correct dt field and format
+  console.log('Fetching today data for user with dt field and Eastern timezone...');
   const { data: todayDataDt, error: todayErrorDt } = await dataClient
     .from('637_close_activities_calls')
     .select('*')
     .eq('setter', setterEmail)
-    .gte('dt', startOfDay.toISOString())
-    .lt('dt', endOfDay.toISOString());
+    .gte('dt', startOfDay)
+    .lte('dt', endOfDay);
 
   console.log('Today data with dt field:', todayDataDt);
   console.log('Today data dt error:', todayErrorDt);
 
-  // Try with created_at field
-  console.log('Fetching today data for user with created_at field...');
-  const { data: todayDataCreated, error: todayErrorCreated } = await dataClient
+  // Also try with just the date part (in case time comparison is problematic)
+  console.log('Fetching today data with date-only comparison...');
+  const { data: todayDataDateOnly, error: todayErrorDateOnly } = await dataClient
     .from('637_close_activities_calls')
     .select('*')
     .eq('setter', setterEmail)
-    .gte('created_at', startOfDay.toISOString())
-    .lt('created_at', endOfDay.toISOString());
+    .like('dt', `${todayDateString}%`);
 
-  console.log('Today data with created_at field:', todayDataCreated);
-  console.log('Today data created_at error:', todayErrorCreated);
-
-  // Try without time filtering - just today's date as string
-  const todayDateString = today.toISOString().split('T')[0]; // YYYY-MM-DD format
-  console.log('Trying date string format:', todayDateString);
-  
-  const { data: todayDataString, error: todayErrorString } = await dataClient
-    .from('637_close_activities_calls')
-    .select('*')
-    .eq('setter', setterEmail)
-    .gte('dt', todayDateString);
-
-  console.log('Today data with date string:', todayDataString);
-  console.log('Today data string error:', todayErrorString);
+  console.log('Today data with date-only:', todayDataDateOnly);
+  console.log('Today data date-only error:', todayErrorDateOnly);
 
   // Use whichever query worked
   let todayData = null;
-  let todayError = null;
 
   if (todayDataDt && todayDataDt.length > 0) {
     todayData = todayDataDt;
     console.log('Using dt field data');
-  } else if (todayDataCreated && todayDataCreated.length > 0) {
-    todayData = todayDataCreated;
-    console.log('Using created_at field data');
-  } else if (todayDataString && todayDataString.length > 0) {
-    todayData = todayDataString;
-    console.log('Using date string data');
+  } else if (todayDataDateOnly && todayDataDateOnly.length > 0) {
+    todayData = todayDataDateOnly;
+    console.log('Using date-only data');
   } else {
-    // If no today data found, use all user data for debugging
-    todayData = userData || [];
-    console.log('No today data found, using all user data for calculations');
+    todayData = [];
+    console.log('No today data found');
   }
 
-  if (userError && allError) {
+  if (userError || allError) {
     return {
       totalDials: 0,
       totalTalkTimeSeconds: 0,
@@ -141,7 +129,7 @@ export async function getTodayCallMetrics(setterEmail: string) {
       calls: todayData || [],
       allData: allData || [], // Return all data for debugging
       userData: userData || [], // Return user-specific data
-      error: 'Multiple query errors occurred'
+      error: userError?.message || allError?.message || 'Query error'
     };
   }
 
