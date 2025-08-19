@@ -70,26 +70,66 @@ export async function getTodayCallMetrics(setterEmail: string) {
     console.error('Error fetching user data:', userError);
   } else {
     console.log('All data for user:', userData);
+    console.log('Number of records for user:', userData?.length || 0);
   }
 
-  // Get today's data for the specific user
-  console.log('Fetching today data for user...');
-  const { data: todayData, error: todayError } = await dataClient
+  // Try different date field names and formats
+  console.log('Fetching today data for user with dt field...');
+  const { data: todayDataDt, error: todayErrorDt } = await dataClient
     .from('637_close_activities_calls')
     .select('*')
     .eq('setter', setterEmail)
     .gte('dt', startOfDay.toISOString())
     .lt('dt', endOfDay.toISOString());
 
-  if (todayError) {
-    console.error('Error fetching today call metrics:', todayError);
+  console.log('Today data with dt field:', todayDataDt);
+  console.log('Today data dt error:', todayErrorDt);
+
+  // Try with created_at field
+  console.log('Fetching today data for user with created_at field...');
+  const { data: todayDataCreated, error: todayErrorCreated } = await dataClient
+    .from('637_close_activities_calls')
+    .select('*')
+    .eq('setter', setterEmail)
+    .gte('created_at', startOfDay.toISOString())
+    .lt('created_at', endOfDay.toISOString());
+
+  console.log('Today data with created_at field:', todayDataCreated);
+  console.log('Today data created_at error:', todayErrorCreated);
+
+  // Try without time filtering - just today's date as string
+  const todayDateString = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+  console.log('Trying date string format:', todayDateString);
+  
+  const { data: todayDataString, error: todayErrorString } = await dataClient
+    .from('637_close_activities_calls')
+    .select('*')
+    .eq('setter', setterEmail)
+    .gte('dt', todayDateString);
+
+  console.log('Today data with date string:', todayDataString);
+  console.log('Today data string error:', todayErrorString);
+
+  // Use whichever query worked
+  let todayData = null;
+  let todayError = null;
+
+  if (todayDataDt && todayDataDt.length > 0) {
+    todayData = todayDataDt;
+    console.log('Using dt field data');
+  } else if (todayDataCreated && todayDataCreated.length > 0) {
+    todayData = todayDataCreated;
+    console.log('Using created_at field data');
+  } else if (todayDataString && todayDataString.length > 0) {
+    todayData = todayDataString;
+    console.log('Using date string data');
   } else {
-    console.log('Today data for user:', todayData);
+    // If no today data found, use all user data for debugging
+    todayData = userData || [];
+    console.log('No today data found, using all user data for calculations');
   }
 
-  const data = todayData || [];
-  
-  if (todayError && userError && allError) {
+  if (userError && allError) {
     return {
       totalDials: 0,
       totalTalkTimeSeconds: 0,
@@ -98,13 +138,14 @@ export async function getTodayCallMetrics(setterEmail: string) {
       dialGoalProgress: 0,
       talkTimeGoalProgress: 0,
       overallGoalProgress: 0,
-      calls: data,
+      calls: todayData || [],
       allData: allData || [], // Return all data for debugging
       userData: userData || [], // Return user-specific data
       error: 'Multiple query errors occurred'
     };
   }
 
+  const data = todayData || [];
   const totalDials = data?.length || 0;
   const totalTalkTimeSeconds = data?.reduce((sum, call) => sum + (call.duration || 0), 0) || 0;
   const totalTalkTimeMinutes = totalTalkTimeSeconds / 60;
