@@ -21,8 +21,8 @@ export async function getTodayCallMetrics(setterEmail: string) {
     .from('637_close_activities_calls')
     .select('*')
     .eq('setter', setterEmail)
-    .gte('createdAt', startOfDay.toISOString())
-    .lt('createdAt', endOfDay.toISOString());
+    .gte('dt', startOfDay.toISOString())
+    .lt('dt', endOfDay.toISOString());
 
   if (error) {
     console.error('Error fetching call metrics:', error);
