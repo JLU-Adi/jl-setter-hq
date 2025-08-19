@@ -1,9 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
-
-const databaseUrl = import.meta.env.VITE_DATA_URL || '';
-const databaseKey = import.meta.env.VITE_DATA_ANON || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bmd5c25zeWxwb3Z6a25hb2xvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4MzY1NDgsImV4cCI6MjA2NzQxMjU0OH0.PSbc4pqm81K6mbjOjH2nKjRE_Qr1OW9o0_EHfgfG9Dg';
-
-export const dataClient = createClient(databaseUrl, databaseKey);
+import { supabase } from './supabase';
 
 export interface CallActivity {
   id: string;
@@ -29,7 +24,7 @@ export async function getTodayCallMetrics(setterEmail: string) {
 
   // Test basic connection first
   console.log('Testing database connection...');
-  const { data: testData, error: testError } = await dataClient
+  const { data: testData, error: testError } = await supabase
     .from('637_close_activities_calls')
     .select('*', { count: 'exact' })
     .limit(5);
@@ -55,7 +50,7 @@ export async function getTodayCallMetrics(setterEmail: string) {
 
   // Get all data without filters (first 50)
   console.log('Fetching all records...');
-  const { data: allData, error: allError } = await dataClient
+  const { data: allData, error: allError } = await supabase
     .from('637_close_activities_calls')
     .select('*')
     .limit(50);
@@ -68,7 +63,7 @@ export async function getTodayCallMetrics(setterEmail: string) {
 
   // Get all data for this user (any date) - for debugging
   console.log('Fetching user-specific records...');
-  const { data: userData, error: userError } = await dataClient
+  const { data: allUserData, error: allUserError } = await supabase
     .from('637_close_activities_calls')
     .select('*')
     .eq('setter', setterEmail);
@@ -82,7 +77,7 @@ export async function getTodayCallMetrics(setterEmail: string) {
 
   // Get today's data using the correct dt field and format
   console.log('Fetching today data for user with dt field and Eastern timezone...');
-  const { data: todayDataDt, error: todayErrorDt } = await dataClient
+  const { data: todayDataCast, error: todayErrorCast } = await supabase
     .from('637_close_activities_calls')
     .select('*')
     .eq('setter', setterEmail)
