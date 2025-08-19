@@ -92,28 +92,13 @@ export async function getTodayCallMetrics(setterEmail: string) {
   console.log('Today data with dt field:', todayDataDt);
   console.log('Today data dt error:', todayErrorDt);
 
-  // Also try with just the date part (in case time comparison is problematic)
-  console.log('Fetching today data with date-only comparison...');
-  const { data: todayDataDateOnly, error: todayErrorDateOnly } = await dataClient
-    .from('637_close_activities_calls')
-    .select('*')
-    .eq('setter', setterEmail)
-    .like('dt', `${todayDateString}%`);
-
-  console.log('Today data with date-only:', todayDataDateOnly);
-  console.log('Today data date-only error:', todayErrorDateOnly);
-
   // Use whichever query worked
-  let todayData = null;
+  let todayData = [];
 
   if (todayDataDt && todayDataDt.length > 0) {
     todayData = todayDataDt;
     console.log('Using dt field data');
-  } else if (todayDataDateOnly && todayDataDateOnly.length > 0) {
-    todayData = todayDataDateOnly;
-    console.log('Using date-only data');
   } else {
-    todayData = [];
     console.log('No today data found');
   }
 
