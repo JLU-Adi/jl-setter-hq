@@ -29,7 +29,6 @@ export async function getTodayCallMetrics(setterEmail: string) {
   // Test basic connection first
   console.log('Testing database connection...');
   
-  let { data: testData, error: testError } = await supabase
   const client = supabase;
   
   let { data: testData, error: testError } = await client
