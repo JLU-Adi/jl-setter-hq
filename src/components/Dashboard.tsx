@@ -331,7 +331,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
             </div>
             
             <div className="mb-4">
-              <h4 className="text-lg font-semibold mb-2 text-yellow-400">All Records from 637_close_activities_calls:</h4>
+              <h4 className="text-lg font-semibold mb-2 text-yellow-400">All Records from close_activities_calls:</h4>
               {debugData.length > 0 ? (
                 <div className="bg-[#0C1018] rounded-lg p-4 max-h-96 overflow-y-auto">
                   <pre className="text-xs text-green-400 whitespace-pre-wrap">
