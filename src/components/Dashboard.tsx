@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { getTodayCallMetrics } from '../lib/database';
 import { 
   Phone, 
   Calendar, 
@@ -41,58 +42,95 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
   const [kpis, setKpis] = useState<KPI[]>([]);
   const [closers, setClosers] = useState<Closer[]>([]);
   const [selectedCloser, setSelectedCloser] = useState<string>('');
-  const [todayStats, setTodayStats] = useState({
-    callsToday: 0,
-    bookingsToday: 0,
-    hoursWorked: 0
+  const [liveMetrics, setLiveMetrics] = useState({
+    totalDials: 0,
+    totalTalkTimeMinutes: 0,
+    totalTalkTimeHours: 0,
+    dialGoalProgress: 0,
+    talkTimeGoalProgress: 0,
+    overallGoalProgress: 0
   });
+  const [loading, setLoading] = useState(true);
+
+  // Fetch live metrics
+  const fetchLiveMetrics = async () => {
+    if (!user?.email) return;
+    
+    try {
+      const metrics = await getTodayCallMetrics(user.email);
+      setLiveMetrics(metrics);
+    } catch (error) {
+      console.error('Error fetching live metrics:', error);
+    }
+  };
 
   useEffect(() => {
-    // Mock KPI data - in real app, fetch from Supabase
+    fetchLiveMetrics();
+    setLoading(false);
+
+    // Set up real-time updates every 30 seconds
+    const interval = setInterval(fetchLiveMetrics, 30000);
+    return () => clearInterval(interval);
+  }, [user?.email]);
+
+  // Update KPIs when live metrics change
+  useEffect(() => {
+    const avgTalkTime = liveMetrics.totalDials > 0 
+      ? (liveMetrics.totalTalkTimeMinutes / liveMetrics.totalDials).toFixed(1)
+      : '0.0';
+
     setKpis([
       {
         label: 'Total Dials Today',
-        value: 127,
-        change: '+12%',
-        trend: 'up',
+        value: liveMetrics.totalDials,
+        change: `Goal: 150`,
+        trend: liveMetrics.totalDials > 0 ? 'up' : 'neutral',
         icon: <Phone className="w-6 h-6" />
       },
       {
-        label: 'Calls Booked',
-        value: 8,
-        change: '+25%',
-        trend: 'up',
-        icon: <Calendar className="w-6 h-6" />
-      },
-      {
-        label: 'Conversion Rate',
-        value: '6.3%',
-        change: '+1.2%',
-        trend: 'up',
-        icon: <TrendingUp className="w-6 h-6" />
-      },
-      {
-        label: 'Revenue Generated',
-        value: '$2,400',
-        change: '+18%',
-        trend: 'up',
-        icon: <DollarSign className="w-6 h-6" />
-      },
-      {
-        label: 'Talk Time',
-        value: '4.2 min',
-        change: '+0.8 min',
-        trend: 'up',
+        label: 'Talk Time Today',
+        value: `${liveMetrics.totalTalkTimeHours.toFixed(1)}h`,
+        change: `Goal: 3h`,
+        trend: liveMetrics.totalTalkTimeHours > 0 ? 'up' : 'neutral',
         icon: <Clock className="w-6 h-6" />
       },
       {
-        label: 'Daily Goal',
-        value: '80%',
-        change: '8/10',
-        trend: 'up',
+        label: 'Avg Talk Time',
+        value: `${avgTalkTime} min`,
+        change: 'Per call',
+        trend: parseFloat(avgTalkTime) > 2 ? 'up' : 'neutral',
+        icon: <TrendingUp className="w-6 h-6" />
+      },
+      {
+        label: 'Daily Goal Progress',
+        value: `${Math.round(liveMetrics.overallGoalProgress)}%`,
+        change: liveMetrics.dialGoalProgress > liveMetrics.talkTimeGoalProgress 
+          ? `${Math.round(liveMetrics.dialGoalProgress)}% dials` 
+          : `${Math.round(liveMetrics.talkTimeGoalProgress)}% talk time`,
+        trend: liveMetrics.overallGoalProgress >= 100 ? 'up' : 
+               liveMetrics.overallGoalProgress >= 50 ? 'up' : 'neutral',
         icon: <Target className="w-6 h-6" />
+      },
+      {
+        label: 'Dial Goal',
+        value: `${liveMetrics.totalDials}/150`,
+        change: `${Math.round(liveMetrics.dialGoalProgress)}%`,
+        trend: liveMetrics.dialGoalProgress >= 100 ? 'up' : 
+               liveMetrics.dialGoalProgress >= 50 ? 'up' : 'neutral',
+        icon: <Phone className="w-6 h-6" />
+      },
+      {
+        label: 'Talk Time Goal',
+        value: `${liveMetrics.totalTalkTimeHours.toFixed(1)}/3h`,
+        change: `${Math.round(liveMetrics.talkTimeGoalProgress)}%`,
+        trend: liveMetrics.talkTimeGoalProgress >= 100 ? 'up' : 
+               liveMetrics.talkTimeGoalProgress >= 50 ? 'up' : 'neutral',
+        icon: <Clock className="w-6 h-6" />
       }
     ]);
+  }, [liveMetrics]);
+
+  useEffect(() => {
 
     // Mock closers data
     setClosers([
@@ -135,12 +173,6 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
 
     // Set default selected closer
     setSelectedCloser('1');
-
-    setTodayStats({
-      callsToday: 127,
-      bookingsToday: 8,
-      hoursWorked: 6.5
-    });
   }, []);
 
   const handleLogout = async () => {
@@ -214,20 +246,54 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
         <div className="bg-[#1A1F2E] rounded-xl p-6 border border-gray-700">
           <h2 className="text-xl font-bold mb-4 flex items-center">
             <Activity className="w-5 h-5 mr-2" />
-            Today's Performance
+            Today's Performance {loading && <span className="ml-2 text-sm text-gray-400">(Loading...)</span>}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-400 mb-2">{todayStats.callsToday}</div>
+              <div className="text-3xl font-bold text-blue-400 mb-2">{liveMetrics.totalDials}</div>
               <div className="text-gray-400">Total Calls</div>
+              <div className="text-sm text-gray-500">Goal: 150</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-green-400 mb-2">{todayStats.bookingsToday}</div>
-              <div className="text-gray-400">Bookings</div>
+              <div className="text-3xl font-bold text-green-400 mb-2">{liveMetrics.totalTalkTimeHours.toFixed(1)}h</div>
+              <div className="text-gray-400">Talk Time</div>
+              <div className="text-sm text-gray-500">Goal: 3h</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-purple-400 mb-2">{todayStats.hoursWorked}h</div>
-              <div className="text-gray-400">Hours Worked</div>
+              <div className="text-3xl font-bold text-purple-400 mb-2">{Math.round(liveMetrics.overallGoalProgress)}%</div>
+              <div className="text-gray-400">Goal Progress</div>
+              <div className="text-sm text-gray-500">
+                {liveMetrics.overallGoalProgress >= 100 ? 'Goal Achieved!' : 'Keep Going!'}
+              </div>
+            </div>
+          </div>
+          
+          {/* Goal Progress Bars */}
+          <div className="mt-6 space-y-4">
+            <div>
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-gray-400">Dial Goal Progress</span>
+                <span className="text-blue-400">{liveMetrics.totalDials}/150</span>
+              </div>
+              <div className="w-full bg-gray-700 rounded-full h-2">
+                <div 
+                  className="bg-blue-500 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min(liveMetrics.dialGoalProgress, 100)}%` }}
+                ></div>
+              </div>
+            </div>
+            
+            <div>
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-gray-400">Talk Time Goal Progress</span>
+                <span className="text-green-400">{liveMetrics.totalTalkTimeHours.toFixed(1)}/3h</span>
+              </div>
+              <div className="w-full bg-gray-700 rounded-full h-2">
+                <div 
+                  className="bg-green-500 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min(liveMetrics.talkTimeGoalProgress, 100)}%` }}
+                ></div>
+              </div>
             </div>
           </div>
         </div>
